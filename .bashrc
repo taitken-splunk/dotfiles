@@ -70,7 +70,6 @@ if [[ -d $HOME/.pyenv ]];
 then
   prepend_path "$HOME/.pyenv/bin"
   eval "$(pyenv init -)"
-  eval "$(pyenv virtualenv-init -)"
 fi
 
 # If go is installed setup the go path
@@ -88,12 +87,28 @@ if [[ `which powerline-go` ]]; then
   USE_POWERLINE=true
 fi
 
-function _update_ps1() {
+function _update_ps1_kube() {
   if [[ $USE_POWERLINE ]]; then
-    PS1="$(powerline-go -modules time,aws,cwd,docker,dotenv,exit,jobs,ssh,termtitle,venv,vgo,git $?)"
+    #PS1="$(powerline-go -modules time,kube,aws,cwd,docker,dotenv,exit,jobs,ssh,termtitle,venv,vgo,git $?)\n$ "
+    eval "$(powerline-go -newline -modules time,kube,aws,cwd,docker,dotenv,exit,jobs,ssh,termtitle,venv,vgo,git  -error $? -eval)"
   else
     PS1="\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"
-  fi 
+  fi
+}
+function _update_ps1() {
+  if [[ $USE_POWERLINE ]]; then
+    PS1="$(powerline-go -modules time,aws,cwd,dotenv,exit,jobs,ssh,termtitle,venv,vgo,git $?)"
+  else
+    PS1="\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"
+  fi
+}
+
+function powerline_kube() {
+    PROMPT_COMMAND="_update_ps1_kube;"
+}
+
+function powerline_plain() {
+    PROMPT_COMMAND="_update_ps1;"
 }
 
 # If this is an xterm set the title to user@host:dir
@@ -102,7 +117,7 @@ case "$TERM" in
     PROMPT_COMMAND='_update_ps1; echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"'
     ;;
   *)
-    PROMPT_COMMAND='_update_ps1;'
+    PROMPT_COMMAND="_update_ps1;"
     ;;
 esac
 
@@ -117,8 +132,8 @@ function load_darwin {
   alias ls='ls -G'
   alias screen="export SCREENPWD=$(pwd); /usr/bin/screen"
 
-  if [ -f /usr/local/bin/hub ]; then
-    alias git='hub'
+  if [ -f /usr/local/bin/lab ]; then
+    alias git='lab'
   fi
 
   export BREW_PATH="/usr/local";
@@ -129,8 +144,9 @@ function load_darwin {
 
 
     if [ -d "$BREW_PATH/opt/ruby" ]; then
-      prepend_path "$BREW_PATH/opt/ruby/bin"
-      export MANPATH=$BREW_PATH/opt/ruby/share/man:$MANPATH
+
+      extend_path "$BREW_PATH/opt/ruby/bin"
+      export MANPATH=$MANPATH:$BREW_PATH/opt/ruby/share/man
     fi
 
     # Add homebrew path to the manpath
