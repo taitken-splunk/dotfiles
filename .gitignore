@@ -19,3 +19,4 @@ bin/*bot
 bin/composer
 bin/composer.phar
 .siege/cookies.txt
+.rake_tasks~

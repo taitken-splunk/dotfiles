@@ -132,10 +132,6 @@ function load_darwin {
   alias ls='ls -G'
   alias screen="export SCREENPWD=$(pwd); /usr/bin/screen"
 
-  if [ -f /usr/local/bin/lab ]; then
-    alias git='lab'
-  fi
-
   export BREW_PATH="/usr/local";
   if [ -d $BREW_PATH ]; then
     # Homebrew path
